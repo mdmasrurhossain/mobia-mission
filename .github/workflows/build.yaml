@@ -2,7 +2,6 @@ name: Build and Test Artifact
 
 on:
   push:
-    branches:
   pull_request:
 
 env:
@@ -40,3 +39,24 @@ jobs:
         with:
           name: flake8_reports
           path: flake8_reports/
+
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          pip install pytest-html
+          pip install -r requirements.txt
+
+      - name: Run pytest
+        run: pytest --html=pytest_reports/pytest-report.html --self-contained-html
+
+      - name: Upload pytest reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: pytest_reports
+          path: pytest_reports/
