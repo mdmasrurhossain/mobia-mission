@@ -1,0 +1,7 @@
+mobiaMissionApp:
+  pythonFlaskApp:
+    image:
+      repository: gcr.io/mobia-mission/mobia-flask
+      tag: <VERSION>
+  replicas: 2
+kubernetesClusterDomain: cluster.local
