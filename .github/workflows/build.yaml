@@ -3,6 +3,7 @@ name: Build and Test Artifact
 on:
   push:
       branches:
+      - 'main'
       - 'staging'
       - 'feature/**'
   pull_request:
