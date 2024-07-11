@@ -12,6 +12,8 @@ env:
   GKE_CLUSTER_NAME_STAGING: staging
   GKE_CLUSTER_NAME_PROD: prod
   GKE_LOCATION: us-central1
+  IMAGE_REPOSITORY: "mobia-assignment"
+  IMAGE_APP_NAME: "mobia-flask"
   USE_GKE_GCLOUD_AUTH_PLUGIN: True  
 
 
