@@ -254,3 +254,45 @@ jobs:
           gcloud components install gke-gcloud-auth-plugin
           gcloud container clusters get-credentials ${{ env.GKE_CLUSTER_NAME_STAGING }} --region us-central1 --project ${{ env.GCP_PROJECT_NAME }}
           kubectl get svc -n ${{ env.STAGING_NAMESPACE }} | awk '{print $4}' | grep -v "EXTERNAL-IP" | while read -r line; do curl "http://$line"; done | grep "Hello Mobia!"
+
+  deploy_prod:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: prod
+    steps:               
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1.1.1
+        with:
+          project_id: ${{ env.GCP_PROJECT_NAME }}
+          service_account_key: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ secrets.SERVICE_ACCOUNT_KEY }}'
+      - id: 'get-credentials'
+        uses: 'google-github-actions/get-gke-credentials@v1'
+        with:
+          cluster_name: '${{ env.GKE_CLUSTER_NAME_PROD }}'
+          location: 'us-central1'
+      - name: Setup helm
+        run: |
+          chmod +x ./get_helm.sh
+          ./get_helm.sh
+        shell: bash  
+      - name: Get version SHA
+        run: |
+          echo "VERSION=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_ENV
+      - name: Kubernetes cluster context change
+        run: |
+          gcloud components install gke-gcloud-auth-plugin
+          gcloud container clusters get-credentials ${{ env.GKE_CLUSTER_NAME_PROD }} --region us-central1 --project ${{ env.GCP_PROJECT_NAME }}
+          sed -i "s/<VERSION>/${{ env.VERSION }}/g" helm/python-deployment/values.yaml
+      - name: Apply helm 
+        run: |
+          helm upgrade --install python-flask -n ${{ env.PROD_NAMESPACE }} helm/python-deployment
