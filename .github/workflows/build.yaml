@@ -178,7 +178,7 @@ jobs:
       
       - name: Test feature environment
         run: |
-          kubectl get svc -n ${{ env.FEATURE_NAMESPACE }} | awk '{print $4}' | grep -v "EXTERNAL-IP" | while read -r line; do curl "http://$line"; done | grep "Hello Test!"
+          kubectl get svc -n ${{ env.FEATURE_NAMESPACE }} | awk '{print $4}' | grep -v "EXTERNAL-IP" | while read -r line; do curl "http://$line"; done | grep "Hello Mobia!"
 
   deploy_stage:
     runs-on: ubuntu-latest
